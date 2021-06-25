@@ -57,7 +57,59 @@ object Spark_Gauhar_Obj {
 					"second_name",
 					"Students_user_components")
 			flatten_df.show(10,false)
-			flatten_df.printSchema()        
+			flatten_df.printSchema()
+
+			println
+			println("==================== Regenerate Complex Data Frame - Part 1 ====================")
+			println
+
+			val complex_df_init = flatten_df.groupBy("address_Permanent_address","address_temporary_address","first_name","second_name")
+			.agg(collect_list(
+
+					struct(
+
+							struct(
+
+									struct(
+
+											col("Students_user_address_Permanent_address").alias("Permanent_address"),
+											col("Students_user_address_temporary_address").alias("temporary_address")
+											).alias("address"),
+									array("Students_user_components").alias("components"),
+									col("Students_user_gender").alias("gender"),
+									struct(
+											col("Students_user_name_first").alias("first"),
+											col("Students_user_name_last").alias("last"),				
+											col("Students_user_name_title").alias("title")
+
+											).alias("name")
+
+									).alias("user")
+
+
+							)
+					).alias("Students")
+					)
+
+			complex_df_init.show(10,false)
+			complex_df_init.printSchema()
+
+			println
+			println("==================== Regenerate Complex Data Frame - Final ====================")
+			println
+
+			val complex_df_final = complex_df_init.select(col("Students"),
+					struct(
+							col("address_Permanent_address").alias("Permanent_address"),
+							col("address_temporary_address").alias("temporary_address")
+							).alias("address"),
+					col("first_name"),
+					col("second_name")
+					)
+
+
+			complex_df_final.show(10,false)
+			complex_df_final.printSchema()	
 
 			println
 			println("==================== Execution Terminated ====================")
